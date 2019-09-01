@@ -31,7 +31,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.jamessonfaria.projetocomments"
-        minSdkVersion 15
+        minSdkVersion 26
         targetSdkVersion 27
         multiDexEnabled true
         versionCode 1

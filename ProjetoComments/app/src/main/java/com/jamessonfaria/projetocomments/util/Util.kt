@@ -3,6 +3,9 @@ package com.jamessonfaria.projetocomments.util
 import android.content.Context
 import android.net.ConnectivityManager
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 object Util {
@@ -16,12 +19,10 @@ object Util {
 
     fun formatarData(data: String): String {
 
-        var formato = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-        var dataFormatada: Date = formato.parse(data)
+        val dataFormatada = LocalDateTime.parse(data, DateTimeFormatter.ISO_DATE_TIME)
 
-
-        formato = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-        var dataFinal = formato.format(dataFormatada)
+        var formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+        var dataFinal = dataFormatada.format(formato)
 
         return dataFinal
     }
