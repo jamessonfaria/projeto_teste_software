@@ -23,6 +23,7 @@ import com.google.gson.reflect.TypeToken
 import com.jamessonfaria.projetocomments.R
 import com.jamessonfaria.projetocomments.adapter.AdapterComentarios
 import com.jamessonfaria.projetocomments.model.Comentario
+import com.jamessonfaria.projetocomments.util.ItemClicked
 import com.jamessonfaria.projetocomments.util.Network
 import com.jamessonfaria.projetocomments.util.Util
 import kotlinx.android.synthetic.main.activity_list_comments.*
@@ -153,7 +154,8 @@ class ListCommentsActivity : AppCompatActivity() {
                         val rv: RecyclerView = findViewById(R.id.rvListaComentarios)
                         rv.layoutManager = LinearLayoutManager(this@ListCommentsActivity) as RecyclerView.LayoutManager?
                         rv.hasFixedSize()
-                        comentarioAdapter = AdapterComentarios(this@ListCommentsActivity, listaComentarios, { comentarioItem: Comentario -> rvItemClicked(comentarioItem)})
+                        comentarioAdapter = AdapterComentarios(this@ListCommentsActivity,
+                                listaComentarios, { comentarioItem: Comentario -> ItemClicked().rvItemClicked(comentarioItem, this@ListCommentsActivity, this@ListCommentsActivity)})
                         rv.adapter = comentarioAdapter
 
                     }
@@ -175,7 +177,7 @@ class ListCommentsActivity : AppCompatActivity() {
         }
     }
 
-    private fun rvItemClicked(comentario : Comentario) {
+ /*  fun rvItemClicked(comentario : Comentario) {
 
         val gson: Gson = Gson()
         val type = object : TypeToken<Comentario>() {}.type
@@ -185,5 +187,5 @@ class ListCommentsActivity : AppCompatActivity() {
         intent.putExtra("COMENTARIO", comentarioJson)
         startActivity(intent)
         overridePendingTransition(R.anim.slide_in_right_animation, R.anim.slide_out_left_animation)
-    }
+    }*/
 }
