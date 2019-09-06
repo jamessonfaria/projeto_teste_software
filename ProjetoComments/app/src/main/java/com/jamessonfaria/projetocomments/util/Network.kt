@@ -105,6 +105,7 @@ class Network (var context: Context) {
 
     }
 
+
     fun getComments(cb: HttpCallback){
 
         if (myCookie == null) {
