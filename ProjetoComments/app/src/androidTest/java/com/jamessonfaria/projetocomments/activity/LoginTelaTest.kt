@@ -1,13 +1,13 @@
 package com.jamessonfaria.projetocomments.activity
 
 import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.rule.ActivityTestRule
 import com.github.rodlibs.persistencecookie.PersistentCookieStore
-import com.jamessonfaria.projetocomments.model.User
-import com.jamessonfaria.projetocomments.retrofit.client.TestWebClient
-import org.junit.Assert
+import com.jamessonfaria.projetocomments.R
+import org.hamcrest.Matchers.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,21 +43,40 @@ class LoginTelaTest {
 
     @Test
     fun deve_RealizarLoginNaTelaLogin() {
-        val client = TestWebClient(activity.activity)
-        val resLogin = client.login(User("crystian@roadmaps.com.br", "12345678"))
 
-        if (!resLogin.isSuccessful) {
-            Assert.fail("Problema ao realizar o login")
-        } else {
-            Assert.assertEquals(resLogin.code(), 201)
-        }
+        onView(allOf(withId(R.id.edtEmail), isDisplayed()))
+                .perform(replaceText("crystian@roadmaps.com.br"),
+                        closeSoftKeyboard())
+
+        onView(allOf(withId(R.id.edtSenha), isDisplayed()))
+                .perform(replaceText("12345678"),
+                        closeSoftKeyboard())
+
+        onView(allOf(withId(R.id.button), withText("Acessar"), isDisplayed()))
+                .perform(click())
+
+        onView(allOf(withText("Comments"), isDisplayed()))
+                .check(matches(withText("Comments")))
     }
 
     @Test
-    fun deve_NaoRealizarLoginNaTelaLogin() {
-        val client = TestWebClient(activity.activity)
-        val resLogin = client.login(User("jame", "123"))
-        Assert.assertNotEquals(resLogin.code(), 201)
+    fun nao_Deve_RealizarLoginNaTelaLogin() {
+
+        onView(allOf(withId(R.id.edtEmail), isDisplayed()))
+                .perform(replaceText("jamesson@roadmaps.com.br"),
+                        closeSoftKeyboard())
+
+        onView(allOf(withId(R.id.edtSenha), isDisplayed()))
+                .perform(replaceText("12345678910"),
+                        closeSoftKeyboard())
+
+        onView(allOf(withId(R.id.button), withText("Acessar"), isDisplayed()))
+                .perform(click())
+
+        onView(
+                allOf(withId(android.R.id.message), withText("Usuário ou Senha Inválidos."),
+                        isDisplayed()))
+                .check(matches(withText("Usuário ou Senha Inválidos.")))
     }
 
 }

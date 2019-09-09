@@ -12,6 +12,5 @@ import org.junit.runners.Suite
         UtilTest::class,
         ComentarioWebClientTest::class,
         AdapterComentariosTest::class
-
 )
 class TestSuite
