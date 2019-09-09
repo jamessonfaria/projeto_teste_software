@@ -3,11 +3,8 @@ package com.jamessonfaria.projetocomments.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
@@ -20,18 +17,16 @@ import android.location.LocationManager
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.os.StrictMode
 import android.provider.MediaStore
 import android.provider.Settings
 import android.support.v4.app.ActivityCompat
+import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.EditText
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.github.rodlibs.persistencecookie.PersistentCookieStore
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException
 import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
@@ -44,13 +39,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.jamessonfaria.projetocomments.R
 import com.jamessonfaria.projetocomments.model.Comentario
-import com.jamessonfaria.projetocomments.util.Network
+import com.jamessonfaria.projetocomments.retrofit.client.ComentarioWebClient
 import com.jamessonfaria.projetocomments.util.Util
 import com.kbeanie.imagechooser.api.*
 import com.kbeanie.imagechooser.exceptions.ChooserException
 import kotlinx.android.synthetic.main.activity_create_comments.*
 import org.jetbrains.anko.*
-import org.json.JSONArray
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -60,7 +54,7 @@ import java.text.SimpleDateFormat
 class CreateCommentsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, ImageChooserListener {
 
     var mGoogleMap: GoogleMap? = null
-    private var net: Network? = null
+    //private var net: Network? = null
     protected var locationManager: LocationManager? = null
     private var map: SupportMapFragment? = null
     private val INITIAL_REQUEST = 200
@@ -91,21 +85,19 @@ class CreateCommentsActivity : AppCompatActivity(), OnMapReadyCallback, Location
     }
 
     fun postComment(view: View) {
-        if(Util.isNetworkAvaliabe(this)) {
+        if (Util.isNetworkAvaliabe(this)) {
 
             var progress = indeterminateProgressDialog("Salvando Comentário...", null)
-            val net = Network(this@CreateCommentsActivity)
 
             val comentario: Comentario = Comentario(0, txtNome.text.toString(), txtDescricao.text.toString(),
-                    "","","", latLng!!.latitude.toString(), latLng!!.longitude.toString())
+                    "", "", "", latLng!!.latitude.toString(), latLng!!.longitude.toString())
 
             alert("Deseja criar o comentário ?", "Informação") {
                 yesButton {
 
-                    //net.postComment(comentario, object : Network.HttpCallback {
-
-                    net.postCommentWithPicture(comentario, img1Path, object : Network.HttpCallback {
-                        override fun onSuccess(response: String) {
+                    val client = ComentarioWebClient(this@CreateCommentsActivity)
+                    client.criarComentario(comentario, img1Path, object : ComentarioWebClient.RespostaListener<Comentario> {
+                        override fun sucesso(resposta: Comentario) {
                             runOnUiThread {
                                 progress.cancel()
                                 alert("Comentário criado com sucesso.", null) {
@@ -114,12 +106,13 @@ class CreateCommentsActivity : AppCompatActivity(), OnMapReadyCallback, Location
                             }
                         }
 
-                        override fun onFailure(response: String?, throwable: Throwable?) {
+                        override fun falha(mensagem: String) {
                             progress.cancel()
-                            toast("ERRO")
+                            toast("ERRO: " + mensagem)
                         }
 
                     })
+
                 }
 
                 noButton { progress.cancel() }
@@ -326,7 +319,7 @@ class CreateCommentsActivity : AppCompatActivity(), OnMapReadyCallback, Location
     override fun onMapReady(googleMap: GoogleMap?) {
 
         mGoogleMap = googleMap
-        net = Network(this@CreateCommentsActivity)
+       // net = Network(this@CreateCommentsActivity)
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

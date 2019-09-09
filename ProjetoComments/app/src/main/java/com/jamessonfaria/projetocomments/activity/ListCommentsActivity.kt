@@ -17,19 +17,16 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.iid.FirebaseInstanceId
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.jamessonfaria.projetocomments.R
 import com.jamessonfaria.projetocomments.adapter.AdapterComentarios
 import com.jamessonfaria.projetocomments.model.Comentario
+import com.jamessonfaria.projetocomments.retrofit.client.ComentarioWebClient
+import com.jamessonfaria.projetocomments.retrofit.client.ComentarioWebClient.RespostaListener
 import com.jamessonfaria.projetocomments.util.ItemClicked
-import com.jamessonfaria.projetocomments.util.Network
 import com.jamessonfaria.projetocomments.util.Util
 import kotlinx.android.synthetic.main.activity_list_comments.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.indeterminateProgressDialog
-import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
 
 
@@ -37,7 +34,7 @@ class ListCommentsActivity : AppCompatActivity() {
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     private var listaComentarios: List<Comentario> = ArrayList<Comentario>()
-    lateinit var mAdView : AdView
+    lateinit var mAdView: AdView
     lateinit var toolbar: Toolbar
     lateinit var searchView: SearchView
     lateinit var comentarioAdapter: AdapterComentarios
@@ -70,7 +67,7 @@ class ListCommentsActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         var item: MenuItem = menu!!.findItem(R.id.action_search)
         searchView = MenuItemCompat.getActionView(item) as SearchView
-        MenuItemCompat.setOnActionExpandListener(item, object : MenuItemCompat.OnActionExpandListener{
+        MenuItemCompat.setOnActionExpandListener(item, object : MenuItemCompat.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 toolbar.setBackgroundColor(resources.getColor(R.color.azulLight))
 
@@ -93,7 +90,7 @@ class ListCommentsActivity : AppCompatActivity() {
     }
 
     private fun searchName(searchView: SearchView) {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 return false
             }
@@ -107,14 +104,14 @@ class ListCommentsActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if(item!!.itemId == R.id.action_search){
+        if (item!!.itemId == R.id.action_search) {
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {
-        if (!searchView.isIconified){
+        if (!searchView.isIconified) {
             searchView.isIconified = true
             return
         }
@@ -135,57 +132,44 @@ class ListCommentsActivity : AppCompatActivity() {
                 "ListCommentsActivity", null)
     }
 
-    fun getComentarios(){
-        if(Util.isNetworkAvaliabe(this)){
+    fun getComentarios() {
+        if (Util.isNetworkAvaliabe(this)) {
 
             var progress = indeterminateProgressDialog("Coletando Comentários...", null)
-            var net = Network(this)
-            net.getComments(object: Network.HttpCallback {
 
-                override fun onSuccess(response: String) {
+            val client = ComentarioWebClient(this@ListCommentsActivity)
+            client.getComentarios(object : RespostaListener<List<Comentario>> {
+                override fun sucesso(resposta: List<Comentario>) {
+
                     runOnUiThread {
                         progress.cancel()
-
-                        var gsonBuilder: GsonBuilder = GsonBuilder()
-                        var gson: Gson = gsonBuilder.create()
-
-                        listaComentarios = gson.fromJson(response, Array<Comentario>::class.java).toList()
+                        listaComentarios = resposta
 
                         val rv: RecyclerView = findViewById(R.id.rvListaComentarios)
                         rv.layoutManager = LinearLayoutManager(this@ListCommentsActivity) as RecyclerView.LayoutManager?
                         rv.hasFixedSize()
                         comentarioAdapter = AdapterComentarios(this@ListCommentsActivity,
-                                listaComentarios, { comentarioItem: Comentario -> ItemClicked().rvItemClicked(comentarioItem, this@ListCommentsActivity, this@ListCommentsActivity)})
+                                listaComentarios, { comentarioItem: Comentario -> ItemClicked().rvItemClicked(comentarioItem, this@ListCommentsActivity, this@ListCommentsActivity) })
                         rv.adapter = comentarioAdapter
 
                     }
-
                 }
 
-                override fun onFailure(response: String?, throwable: Throwable?) {
+                override fun falha(mensagem: String) {
                     runOnUiThread {
                         progress.cancel()
-                        toast("ERRO")
+                        alert(mensagem, null) {
+                            yesButton { }
+                        }.show()
                     }
                 }
 
             })
-        }else{
+        } else {
             alert("Problema na Conexão com a Internet.", null) {
                 yesButton { finish() }
             }.show()
         }
     }
 
- /*  fun rvItemClicked(comentario : Comentario) {
-
-        val gson: Gson = Gson()
-        val type = object : TypeToken<Comentario>() {}.type
-        val comentarioJson = gson.toJson(comentario, type)
-
-        var intent: Intent = Intent(this@ListCommentsActivity, DetailCommentActivity::class.java)
-        intent.putExtra("COMENTARIO", comentarioJson)
-        startActivity(intent)
-        overridePendingTransition(R.anim.slide_in_right_animation, R.anim.slide_out_left_animation)
-    }*/
 }

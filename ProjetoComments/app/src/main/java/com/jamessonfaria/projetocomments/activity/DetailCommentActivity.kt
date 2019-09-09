@@ -22,7 +22,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.jamessonfaria.projetocomments.R
 import com.jamessonfaria.projetocomments.model.Comentario
-import com.jamessonfaria.projetocomments.util.Network
+import com.jamessonfaria.projetocomments.retrofit.client.ComentarioWebClient
+import com.jamessonfaria.projetocomments.retrofit.client.ComentarioWebClient.RespostaListener
 import com.jamessonfaria.projetocomments.util.Util
 import kotlinx.android.synthetic.main.activity_detail_comment.*
 import org.jetbrains.anko.*
@@ -32,7 +33,7 @@ class DetailCommentActivity : AppCompatActivity(), OnMapReadyCallback, LocationL
 
     private var comentario: Comentario? = null
     var mGoogleMap: GoogleMap? = null
-    private var net: Network? = null
+  //  private var net: Network? = null
     protected var locationManager: LocationManager? = null
     private var map: SupportMapFragment? = null
     private val INITIAL_REQUEST = 200
@@ -73,17 +74,16 @@ class DetailCommentActivity : AppCompatActivity(), OnMapReadyCallback, LocationL
 
     fun delete(view: View) {
 
-        if(Util.isNetworkAvaliabe(this)){
+        if (Util.isNetworkAvaliabe(this)) {
 
             var progress = indeterminateProgressDialog("Deletando comentário...", null)
-            var net = Network(this)
 
             alert("Deseja remover o comentário ?", "Informação") {
                 yesButton {
 
-                    net.delete(comentario!!.id, object: Network.HttpCallback {
-
-                        override fun onSuccess(response: String) {
+                    var client = ComentarioWebClient(this@DetailCommentActivity)
+                    client.delete(comentario!!.id, object : RespostaListener<String> {
+                        override fun sucesso(resposta: String) {
                             runOnUiThread {
                                 progress.cancel()
 
@@ -92,13 +92,12 @@ class DetailCommentActivity : AppCompatActivity(), OnMapReadyCallback, LocationL
                                 }.show()
 
                             }
-
                         }
 
-                        override fun onFailure(response: String?, throwable: Throwable?) {
+                        override fun falha(mensagem: String) {
                             runOnUiThread {
                                 progress.cancel()
-                                toast("ERRO")
+                                toast("ERRO: " + mensagem)
                             }
                         }
 
@@ -109,7 +108,7 @@ class DetailCommentActivity : AppCompatActivity(), OnMapReadyCallback, LocationL
                 noButton { progress.cancel() }
             }.show()
 
-        }else{
+        } else {
             alert("Problema na Conexão com a Internet.", null) {
                 yesButton { finish() }
             }.show()
@@ -140,9 +139,9 @@ class DetailCommentActivity : AppCompatActivity(), OnMapReadyCallback, LocationL
     override fun onMapReady(googleMap: GoogleMap?) {
         mGoogleMap = googleMap
 
-       // val latLng = LatLng(location!!.getLatitude(), location!!.getLongitude())
+        // val latLng = LatLng(location!!.getLatitude(), location!!.getLongitude())
 
-        if(comentario?.lat != null && comentario?.lng != null && !comentario?.lat.equals("") && !comentario?.lng.equals("")){
+        if (comentario?.lat != null && comentario?.lng != null && !comentario?.lat.equals("") && !comentario?.lng.equals("")) {
 
             val latLng = LatLng(comentario!!.lat.toDouble(), comentario!!.lng.toDouble())
 
