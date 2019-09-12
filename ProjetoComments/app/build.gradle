@@ -16,6 +16,8 @@ buildscript {
 
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
+apply plugin: 'org.sonarqube'
+apply plugin: 'jacoco-android'
 
 apply plugin: 'kotlin-android'
 
@@ -43,6 +45,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            testCoverageEnabled true
+        }
+        debug {
+            testCoverageEnabled true
         }
     }
     testOptions {
@@ -98,3 +104,18 @@ dependencies {
     }
 }
 
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "ProjetoComments"
+            property "sonar.projectKey", "ProjetoComments"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", "1.0"
+            property "sonar.language", "kotlin"
+            property "sonar.sources", "src/main/"
+            property "sonar.tests", "src/androidTest/,src/test/"
+            property "sonar.java.coveragePlugin", "jacoco"
+        }
+    }
+
+}
