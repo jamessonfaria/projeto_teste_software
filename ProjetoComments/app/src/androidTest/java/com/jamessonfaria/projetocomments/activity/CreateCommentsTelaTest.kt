@@ -11,11 +11,20 @@ import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.rule.ActivityTestRule
 import android.support.test.rule.GrantPermissionRule
 import android.support.test.uiautomator.UiDevice
+import android.view.View
+import android.view.ViewGroup
 import com.jamessonfaria.projetocomments.R
+import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import android.support.test.uiautomator.UiSelector
+import android.support.test.uiautomator.UiObject
+
+
 
 class CreateCommentsTelaTest {
 
@@ -52,6 +61,7 @@ class CreateCommentsTelaTest {
         onView(allOf(withId(R.id.fab), isDisplayed()))
                 .perform(click())
 
+        Thread.sleep(5000)
 
         onView(allOf(withId(R.id.txtNome), isDisplayed()))
                 .perform(replaceText("teste automatizado"),

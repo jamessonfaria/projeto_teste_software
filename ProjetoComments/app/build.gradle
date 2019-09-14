@@ -17,7 +17,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'org.sonarqube'
-apply plugin: 'jacoco-android'
+//apply plugin: 'jacoco-android'
 
 apply plugin: 'kotlin-android'
 
@@ -114,7 +114,7 @@ sonarqube {
             property "sonar.language", "kotlin"
             property "sonar.sources", "src/main/"
             property "sonar.tests", "src/androidTest/,src/test/"
-            property "sonar.java.coveragePlugin", "jacoco"
+           // property "sonar.java.coveragePlugin", "jacoco"
         }
     }
 

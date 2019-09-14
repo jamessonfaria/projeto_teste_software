@@ -316,6 +316,7 @@ class CreateCommentsActivity : AppCompatActivity(), OnMapReadyCallback, Location
 
     }
 
+
     override fun onMapReady(googleMap: GoogleMap?) {
 
         mGoogleMap = googleMap
